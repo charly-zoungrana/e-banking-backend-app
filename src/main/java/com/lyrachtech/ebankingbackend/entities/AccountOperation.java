@@ -11,13 +11,14 @@ import java.util.Date;
 
 @Entity
 @Data @NoArgsConstructor @AllArgsConstructor @Builder
-public class AccountOperations {
+public class AccountOperation {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
     private Date operationDate;
     private Double amount;
+    @Enumerated(EnumType.STRING)
     private OperationType type;
     @ManyToOne
     @JoinColumn(name="bank_account_id")
