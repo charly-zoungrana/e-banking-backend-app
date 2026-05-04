@@ -20,6 +20,7 @@ public class AccountOperation {
     private Double amount;
     @Enumerated(EnumType.STRING)
     private OperationType type;
+    private String description;
     @ManyToOne
     @JoinColumn(name="bank_account_id")
     private BankAccount bankAccount;
