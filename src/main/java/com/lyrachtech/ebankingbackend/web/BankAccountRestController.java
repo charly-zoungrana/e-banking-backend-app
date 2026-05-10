@@ -1,8 +1,7 @@
 package com.lyrachtech.ebankingbackend.web;
 
-import com.lyrachtech.ebankingbackend.dtos.AccountHistoryDTO;
-import com.lyrachtech.ebankingbackend.dtos.AccountOperationDTO;
-import com.lyrachtech.ebankingbackend.dtos.BankAccountDTO;
+import com.lyrachtech.ebankingbackend.dtos.*;
+import com.lyrachtech.ebankingbackend.exceptions.BalanceNotSufficientException;
 import com.lyrachtech.ebankingbackend.exceptions.BankAccountNotFoundException;
 import com.lyrachtech.ebankingbackend.services.BankAccountService;
 import lombok.RequiredArgsConstructor;
@@ -38,5 +37,26 @@ public class BankAccountRestController {
                                                      @RequestParam(name="size",defaultValue="5") int size) throws BankAccountNotFoundException {
         return bankAccountService.getAccountHistory(accountId,page,size);
     }
+
+    @PostMapping("/accounts/debit")
+    public DebitDTO debit(@RequestBody DebitDTO debitDTO) throws BankAccountNotFoundException, BalanceNotSufficientException {
+        this.bankAccountService.debit(debitDTO.getAccountId(),debitDTO.getAmount(), debitDTO.getDescription());
+        return debitDTO;
+    }
+
+    @PostMapping("/accounts/credit")
+    public CreditDTO debit(@RequestBody CreditDTO creditDTO) throws BankAccountNotFoundException, BalanceNotSufficientException {
+        this.bankAccountService.debit(creditDTO.getAccountId(),creditDTO.getAmount(), creditDTO.getDescription());
+        return creditDTO;
+    }
+
+    @PostMapping("/accounts/transfer")
+    public void transfer(@RequestBody TransferRequestDTO transferRequestDTO) throws BankAccountNotFoundException, BalanceNotSufficientException {
+        this.bankAccountService.transfer(
+                transferRequestDTO.getAccountSource(),
+                transferRequestDTO.getAccountDestination(),
+                transferRequestDTO.getAmount());
+    }
+
 
 }
