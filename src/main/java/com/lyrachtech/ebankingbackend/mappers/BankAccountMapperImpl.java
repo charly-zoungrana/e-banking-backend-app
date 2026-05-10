@@ -1,15 +1,11 @@
 package com.lyrachtech.ebankingbackend.mappers;
 
-import com.lyrachtech.ebankingbackend.dtos.AccountOperationDTO;
-import com.lyrachtech.ebankingbackend.dtos.CurrentBankAccountDTO;
-import com.lyrachtech.ebankingbackend.dtos.CustomerDTO;
-import com.lyrachtech.ebankingbackend.dtos.SavingBankAccountDTO;
-import com.lyrachtech.ebankingbackend.entities.AccountOperation;
-import com.lyrachtech.ebankingbackend.entities.CurrentAccount;
-import com.lyrachtech.ebankingbackend.entities.Customer;
-import com.lyrachtech.ebankingbackend.entities.SavingAccount;
+import com.lyrachtech.ebankingbackend.dtos.*;
+import com.lyrachtech.ebankingbackend.entities.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class BankAccountMapperImpl {
@@ -60,6 +56,19 @@ public class BankAccountMapperImpl {
         AccountOperationDTO accountOperationDTO=new AccountOperationDTO();
         BeanUtils.copyProperties(accountOperation,accountOperationDTO);
         return accountOperationDTO;
+    }
+
+    public BankAccountDTO fromBankAccount(BankAccount bankAccount){
+        BankAccountDTO bankAccountDTO=new BankAccountDTO();
+        BeanUtils.copyProperties(bankAccount,bankAccountDTO);
+        if(bankAccount instanceof SavingAccount){
+            bankAccountDTO.setType(SavingAccount.class.getSimpleName());
+        }else if(bankAccount instanceof CurrentAccount){
+            bankAccountDTO.setType(CurrentAccount.class.getSimpleName());
+        }
+
+        return bankAccountDTO;
+
     }
 
 

@@ -6,6 +6,7 @@ import com.lyrachtech.ebankingbackend.enums.OperationType;
 import com.lyrachtech.ebankingbackend.exceptions.BalanceNotSufficientException;
 import com.lyrachtech.ebankingbackend.exceptions.BankAccountNotFoundException;
 import com.lyrachtech.ebankingbackend.exceptions.CustomerNotFound;
+import com.lyrachtech.ebankingbackend.exceptions.UnAuthorizedAccountOperation;
 import com.lyrachtech.ebankingbackend.mappers.BankAccountMapperImpl;
 import com.lyrachtech.ebankingbackend.repositories.AccountOperationRepository;
 import com.lyrachtech.ebankingbackend.repositories.BankAccountRepository;
@@ -142,10 +143,13 @@ public class BankAccountServiceImpl implements BankAccountService {
     }
 
     @Override
-    public void transfer(String accountIdSource, String accountIdDestination, double amount) throws BankAccountNotFoundException, BalanceNotSufficientException {
+    public void transfer(String accountIdSource, String accountIdDestination, double amount) throws BankAccountNotFoundException, BalanceNotSufficientException, UnAuthorizedAccountOperation {
 
-        debit(accountIdSource,amount,"Transfer to "+accountIdDestination);
-        credit(accountIdDestination,amount,"Transfer from "+accountIdSource);
+        if(accountIdSource.equals(accountIdDestination)){
+            throw new UnAuthorizedAccountOperation("accountIdSource and accountIdDestination must not be the same");
+        }
+        debit(accountIdSource,amount,"DEBIT");
+        credit(accountIdDestination,amount,"CREDIT");
     }
 
     @Override
@@ -197,7 +201,7 @@ public class BankAccountServiceImpl implements BankAccountService {
     public AccountHistoryDTO getAccountHistory(String accountId, int page, int size) throws BankAccountNotFoundException {
         BankAccount bankAccount=bankAccountRepository.findById(accountId)
                 .orElseThrow(()->new BankAccountNotFoundException("Bank not found"));
-        Page<AccountOperation> accountOperations = accountOperationRepository.findByBankAccountId(accountId, PageRequest.of(page, size));
+        Page<AccountOperation> accountOperations = accountOperationRepository.findByBankAccountIdOrderByOperationDateDesc(accountId, PageRequest.of(page, size));
         AccountHistoryDTO accountHistoryDTO=new AccountHistoryDTO();
         List<AccountOperationDTO> historyOperations = accountOperations.getContent().stream()
                 .map(dtoMapper::fromAccountOperation)
@@ -219,5 +223,19 @@ public class BankAccountServiceImpl implements BankAccountService {
         return customers.stream()
                 .map(dtoMapper::fromCustomer)
                 .toList();
+    }
+
+    @Override
+    public CustomerBankAccountsDTO getCustomerBankAccounts(Long customerId) {
+        List<BankAccount> bankAccounts=bankAccountRepository.findByCustomerId(customerId);
+        CustomerBankAccountsDTO customerBankAccountDTO=new CustomerBankAccountsDTO();
+        customerBankAccountDTO.setCustomerDTO(dtoMapper.fromCustomer(customerRepository.findById(customerId).orElse(null)));
+
+        List<BankAccountDTO> bankAccountDTOS=bankAccounts.stream()
+                .map(dtoMapper::fromBankAccount)
+                .toList();
+
+        customerBankAccountDTO.setBankAccountDTOS(bankAccountDTOS);
+        return customerBankAccountDTO;
     }
 }

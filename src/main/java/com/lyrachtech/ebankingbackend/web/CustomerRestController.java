@@ -1,5 +1,7 @@
 package com.lyrachtech.ebankingbackend.web;
 
+import com.lyrachtech.ebankingbackend.dtos.BankAccountDTO;
+import com.lyrachtech.ebankingbackend.dtos.CustomerBankAccountsDTO;
 import com.lyrachtech.ebankingbackend.dtos.CustomerDTO;
 import com.lyrachtech.ebankingbackend.exceptions.CustomerNotFound;
 import com.lyrachtech.ebankingbackend.services.BankAccountService;
@@ -49,4 +51,9 @@ public class CustomerRestController {
     public List<CustomerDTO> searchCustomers(@RequestParam(name="keyword",defaultValue = "") String keyword){
         return bankAccountService.searchCustomers("%"+keyword+"%");
     };
+
+    @GetMapping("/customers/{customerId}/accounts")
+    public CustomerBankAccountsDTO getCustomerBankAccounts(@PathVariable Long customerId){
+        return bankAccountService.getCustomerBankAccounts(customerId);
+    }
 }
